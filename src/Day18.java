@@ -44,6 +44,10 @@ public class Day18 implements Day {
         }
     }
 
+    /**
+     * This structure is used to keep track of already visited nodes
+     * and determine if there is a shorter distance to the specific position and collected keys
+     */
     class Node {
         final Point point;
         final HashSet<Character> keys;
@@ -67,6 +71,9 @@ public class Day18 implements Day {
         }
     }
 
+    /**
+     * State node in the search tree
+     */
     class State {
         final int dist;
         final Point point;
@@ -85,7 +92,9 @@ public class Day18 implements Day {
     }
 
 
-
+    /**
+     * Comparator in order to sort priority queue
+     */
     class StateComparator implements Comparator<State> {
         @Override
         public int compare(State o1, State o2) {
@@ -97,6 +106,10 @@ public class Day18 implements Day {
         }
     }
 
+    /*
+     * Build hashmap that represents the map with position as key and
+     * a char as value
+     */
     public HashMap createMap(String input) {
         HashMap map = new HashMap<Point, Character>();
         String[] lines = input.lines().toArray(String[]::new);
@@ -111,6 +124,9 @@ public class Day18 implements Day {
         return map;
     }
 
+    /**
+     * Print current map
+     */
     public void printMap(HashMap<Point,Character> map) {
         int max_x = map.entrySet().stream().map( (entry) -> entry.getKey().x).max(Integer::compareTo).get();
         int max_y = map.entrySet().stream().map( (entry) -> entry.getKey().y).max(Integer::compareTo).get();
@@ -138,25 +154,31 @@ public class Day18 implements Day {
         Point start_pos = map.entrySet().stream().filter( (entry) -> entry.getValue() == '@').map(entry -> entry.getKey()).findFirst().get();
         long num_keys = map.entrySet().stream().filter(entry -> Character.isLowerCase(entry.getValue().charValue())).count();
 
+        // Create priority queue which should be ordered by distance from origin and number of keys collected
+        // smallest distance from origin and state which most keys should be processed first
         PriorityQueue<State> queue = new PriorityQueue(10, new StateComparator());
         State initialState = new State(0,start_pos, new HashSet());
 
+        // Add initial state to queue and visited map
         queue.add(initialState);
         visited.put(initialState.getNode(),0);
+
+        // Keep track of number of iterations to find a solution
         int iterations = 0;
         while (!queue.isEmpty()) {
 
-            // Poll item
+            // De-queue first item
             State state = queue.poll();
             int dist = state.dist;
             iterations++;
 
-            // Found all keys?
+            // If all keys are found, the solution is found...
             if (state.keys.size() == num_keys) {
                 System.out.println("Iterations = " + iterations);
                 return Integer.valueOf(dist).toString();
             }
 
+            // Build a list of adjacent points of the current position/state
             Point points[] = {state.point.up(), state.point.down(), state.point.left(), state.point.right()};
             ArrayList<State> nextStates = new ArrayList<>();
 
@@ -173,7 +195,7 @@ public class Day18 implements Day {
                     // Closed space...
 
                 } else if ( Character.isLowerCase(pos) ) {
-                    // Found new key..
+                    // Found new key, create a new state node that contains the new key
                     HashSet set = new HashSet();
                     state.keys.stream().forEach( item -> set.add(item));
                     set.add(pos);
@@ -182,6 +204,7 @@ public class Day18 implements Day {
                 }
             });
 
+            // Check of the potential adjacent states are already visited with a shorter distance
             nextStates.forEach( nextState -> {
                 Node nextNode = nextState.getNode();
                 Integer prev_dist = visited.get(nextNode);

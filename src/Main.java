@@ -35,7 +35,7 @@ public class Main {
                 }
 
             } catch (IOException exception) {
-                System.err.println("Failed to read stdinput.");
+                System.err.println("Failed to read stdin.");
             }
         }
     }

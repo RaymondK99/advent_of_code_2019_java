@@ -8,6 +8,8 @@ public class Main {
         switch (day) {
             case 18:
                 return new Day18();
+            case 22:
+                return new Day22_2018();
             default:
                 break;
         }
